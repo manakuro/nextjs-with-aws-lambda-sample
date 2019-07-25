@@ -1,0 +1,25 @@
+service: ${self:custom.name}
+
+provider:
+  name: aws
+  runtime: nodejs10.x
+  stage: ${opt:stage, 'dev'}
+  region: ap-northeast-1
+  resourcePolicy: ${file(./serverless.${self:provider.stage}.yml):resourcePolicy}
+
+plugins:
+  - serverless-nextjs-plugin
+  - serverless-domain-manager
+
+custom:
+  name: my-app
+  serverless-nextjs:
+    assetsBucketName: 'my-app-assets-${self:provider.stage}'
+  customDomain:
+    domainName: ${file(./serverless.${self:provider.stage}.yml):custom.customDomain}
+
+package:
+  # exclude everything
+  # page handlers are automatically included by the plugin
+  exclude:
+    - ./**

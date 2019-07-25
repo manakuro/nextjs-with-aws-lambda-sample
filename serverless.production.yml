@@ -1,0 +1,17 @@
+resourcePolicy:
+  - Effect: Allow
+    Principal: "*"
+    Action: execute-api:Invoke
+    Resource:
+      - execute-api:/*/*/*
+    Condition:
+      IpAddress:
+        aws:SourceIp:
+          - "xxx.xxx.xxx.xx"
+
+custom:
+  customDomain:
+    domainName: 'mydomain.me'
+    basePath: ''
+    stage: ${self:provider.stage}
+    createRoute53Record: true
