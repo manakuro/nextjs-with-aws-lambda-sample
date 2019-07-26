@@ -1,9 +1,11 @@
 {
-  "name": "create-next-example-app",
+  "name": "my-app",
   "scripts": {
     "dev": "next",
     "build": "next build",
-    "start": "next start"
+    "start": "next start",
+    "deploy:staging": "sls deploy --stage staging -v",
+    "deploy:production": "sls deploy --stage production -v"
   },
   "dependencies": {
     "next": "^8.1.0",

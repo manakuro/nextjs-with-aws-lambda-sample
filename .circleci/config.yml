@@ -1,0 +1,49 @@
+version: 2.1
+
+executors:
+  default:
+    docker:
+      - image: circleci/node:10.0.0
+    working_directory: ~/my-app
+
+commands:
+  restore_yarn:
+    steps:
+      - restore_cache:
+          key: yarn-v1-{{ checksum "yarn.lock" }}-{{ arch }}-{{ .Branch }}
+
+  save_yarn:
+    steps:
+      - save_cache:
+          key: yarn-v1-{{ checksum "yarn.lock" }}-{{ arch }}-{{ .Branch }}
+          paths:
+            - ~/.cache/yarn
+
+  restore_node:
+    steps:
+      - restore_cache:
+          key: node-v1-{{ checksum "package.json" }}-{{ arch }}-{{ .Branch }}
+
+  save_node:
+    steps:
+      - save_cache:
+          key: node-v1-{{ checksum "package.json" }}-{{ arch }}-{{ .Branch }}
+          paths:
+            - node_modules
+
+jobs:
+  node:
+    executor:
+      name: default
+    steps:
+      - checkout
+      - restore_yarn
+      - restore_node
+      - run: yarn
+      - save_yarn
+      - save_node
+
+workflows:
+  build_and_deploy:
+    jobs:
+      - node
