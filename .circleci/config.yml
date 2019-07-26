@@ -76,8 +76,8 @@ jobs:
           aws-access-key-id: << parameters.aws-access-key-id >>
           aws-secret-access-key: << parameters.aws-secret-access-key >>
           aws-region: << parameters.aws-region >>
-      # - run: yarn deploy:<< parameters.env >>
-      # - store_build_artifacts
+      - run: yarn deploy:<< parameters.env >>
+      - store_build_artifacts
 
 workflows:
   build_and_deploy:
