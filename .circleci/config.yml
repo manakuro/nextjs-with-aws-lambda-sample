@@ -1,5 +1,8 @@
 version: 2.1
 
+orbs:
+  aws-cli: circleci/aws-cli@0.1.13
+
 executors:
   default:
     docker:
@@ -30,6 +33,11 @@ commands:
           key: node-v1-{{ checksum "package.json" }}-{{ arch }}-{{ .Branch }}
           paths:
             - node_modules
+  
+  store_build_artifacts:
+    steps:
+      - store_artifacts:
+          path: .next
 
 jobs:
   node:
@@ -43,7 +51,64 @@ jobs:
       - save_yarn
       - save_node
 
+  deploy:
+    parameters:
+      env:
+        type: enum
+        enum: ["production", "staging"]
+      aws-access-key-id:
+        type: env_var_name
+      aws-secret-access-key:
+        type: env_var_name
+      aws-region:
+        type: env_var_name
+    executor:
+      name: default
+    steps:
+      - checkout
+      - restore_yarn
+      - restore_node
+      - run: yarn
+      - save_yarn
+      - save_node
+      - aws-cli/install
+      - aws-cli/configure:
+          aws-access-key-id: << parameters.aws-access-key-id >>
+          aws-secret-access-key: << parameters.aws-secret-access-key >>
+          aws-region: << parameters.aws-region >>
+      # - run: yarn deploy:<< parameters.env >>
+      # - store_build_artifacts
+
 workflows:
   build_and_deploy:
     jobs:
       - node
+
+      # staging
+      - deploy: &deploy
+          env: staging
+          aws-access-key-id: AWS_ACCESS_KEY_ID
+          aws-secret-access-key: AWS_SECRET_ACCESS_KEY
+          aws-region: AWS_DEFAULT_REGION
+
+          requires:
+            - node
+          name: deploy_staging
+          filters:
+            branches:
+              only: staging
+            tags:
+              ignore: /.*/
+      
+      # production
+      - deploy:
+          <<: *deploy
+
+          env: production
+
+          name: deploy_production
+          filters:
+            branches:
+              ignore: /.*/
+            tags:
+              only: /^v.+$/
