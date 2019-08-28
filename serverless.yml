@@ -15,8 +15,7 @@ custom:
   name: my-app
   serverless-nextjs:
     assetsBucketName: 'my-app-assets-${self:provider.stage}'
-  customDomain:
-    domainName: ${file(./serverless.${self:provider.stage}.yml):custom.customDomain}
+  customDomain: ${file(./serverless.${self:provider.stage}.yml):custom.customDomain}
 
 package:
   # exclude everything
